@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--开启注解扫描-->
+    <context:component-scan base-package="com.baizhi.service"/>
+
+    <!--引入小配置文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--创建数据源-->
+    <bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--创建sqlsessionFactory 由spring创建sqlSessionFactory配置数据源 别名 注册mapper-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
+        <!--连接数据库-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--别名-->
+        <property value="com.baizhi.entity" name="typeAliasesPackage"/>
+        <!--注册-->
+        <property name="mapperLocations" value="classpath:com/baizhi/mapper/*.xml"/>
+    </bean>
+
+    <!-- dao对象的创建也由Spring管理 配置MapperScannerConfigure，由Spring创建dao对象，
+        需要注入sqlSessionFactoryBean的dao所在的包 自动创建dao对象的名称，接口的首字母小写（UserDao==userDao）
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+        <property name="basePackage" value="com.baizhi.dao"/>
+    </bean>
+
+    <!--配置事务管理器 用于管理事务  需要注入连接池（数据源对象）-->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--开启注解式生效-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>
