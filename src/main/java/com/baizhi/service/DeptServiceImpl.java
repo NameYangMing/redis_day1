@@ -23,6 +23,7 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void insertOne(Dept dept) {
 
+        System.out.println("AAAAAAAAAAAAAAAAAAAAA");
         Jedis jedis = null;
         try {
             jedis = new Jedis("192.168.190.128", 7000);
